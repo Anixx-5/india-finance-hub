@@ -6,7 +6,8 @@
 <title>India Finance Hub — NSE, BSE, Crypto & More</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>:root {
+<style>
+:root {
   --bg: #0f1117; --bg2: #161b27; --bg3: #1e2433;
   --border: #2a3045; --blue: #4f8ef7; --green: #0ecb81;
   --red: #f6465d; --white: #eaf0fb; --muted: #7b8bb2;
@@ -150,6 +151,7 @@ tbody td { padding:.75rem 1rem; font-size:.85rem; white-space:nowrap; }
 
 @media (max-width:900px) { .nav-tabs { display:none; } .two-col { grid-template-columns:1fr; } .main { padding:1rem; } }
 
+
 .chart-wrap{margin-top:1.5rem;background:var(--bg3);border-radius:10px;padding:1rem;}
 .chart-timeframes{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap;}
 .tf-btn{padding:.25rem .7rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
@@ -159,6 +161,7 @@ tbody td { padding:.75rem 1rem; font-size:.85rem; white-space:nowrap; }
 .chart-ohlc{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:.8rem;font-size:.78rem;}
 .chart-ohlc span{color:var(--muted);}
 .chart-ohlc b{color:var(--white);}
+
 </style>
 </head>
 <body>
@@ -194,22 +197,23 @@ tbody td { padding:.75rem 1rem; font-size:.85rem; white-space:nowrap; }
             <button class="dp-close" onclick="closeDetail()">✕</button>
           </div>
           <div class="dp-stats" id="dp-stats"></div>
-          <div class="chart-wrap" id="dp-chart-wrap" style="display:none">
-            <div class="chart-ohlc" id="dp-ohlc"></div>
-            <div class="chart-timeframes">
-              <button class="tf-btn" onclick="loadChart('dp','1d')">1D</button>
-              <button class="tf-btn" onclick="loadChart('dp','5d')">5D</button>
-              <button class="tf-btn" onclick="loadChart('dp','1mo')">1M</button>
-              <button class="tf-btn" onclick="loadChart('dp','3mo')">3M</button>
-              <button class="tf-btn" onclick="loadChart('dp','6mo')">6M</button>
-              <button class="tf-btn active" onclick="loadChart('dp','1y')">1Y</button>
-              <button class="tf-btn" onclick="loadChart('dp','2y')">2Y</button>
-              <button class="tf-btn" onclick="loadChart('dp','5y')">5Y</button>
-              <button class="tf-btn" onclick="loadChart('dp','10y')">10Y</button>
-              <button class="tf-btn" onclick="loadChart('dp','max')">Max</button>
-            </div>
-            <div class="chart-container"><canvas id="dp-canvas"></canvas></div>
-          </div>
+          
+<div class="chart-wrap" id="dp-chart-wrap" style="display:none">
+  <div class="chart-ohlc" id="dp-ohlc"></div>
+  <div class="chart-timeframes">
+    <button class="tf-btn" onclick="loadChart('dp','1d')">1D</button>
+    <button class="tf-btn" onclick="loadChart('dp','5d')">5D</button>
+    <button class="tf-btn" onclick="loadChart('dp','1mo')">1M</button>
+    <button class="tf-btn" onclick="loadChart('dp','3mo')">3M</button>
+    <button class="tf-btn" onclick="loadChart('dp','6mo')">6M</button>
+    <button class="tf-btn active" onclick="loadChart('dp','1y')">1Y</button>
+    <button class="tf-btn" onclick="loadChart('dp','2y')">2Y</button>
+    <button class="tf-btn" onclick="loadChart('dp','5y')">5Y</button>
+    <button class="tf-btn" onclick="loadChart('dp','10y')">10Y</button>
+    <button class="tf-btn" onclick="loadChart('dp','max')">Max</button>
+  </div>
+  <div class="chart-container"><canvas id="dp-canvas"></canvas></div>
+</div>
         </div>
         <div class="section-title">Top NSE Stocks</div>
         <div class="market-grid" id="market-grid"></div>
@@ -250,9 +254,12 @@ tbody td { padding:.75rem 1rem; font-size:.85rem; white-space:nowrap; }
       </div>
       <table>
         <thead><tr>
-          <th onclick="sortStocks('symbol')">Symbol ↕</th><th onclick="sortStocks('name')">Name ↕</th>
-          <th onclick="sortStocks('price')">Price ↕</th><th onclick="sortStocks('change')">Change ↕</th>
-          <th onclick="sortStocks('pct')">% Change ↕</th><th>High</th><th>Day Range</th>
+          <th onclick="sortStocks('symbol')">Symbol ↕</th>
+          <th onclick="sortStocks('name')">Name ↕</th>
+          <th onclick="sortStocks('price')">Price ↕</th>
+          <th onclick="sortStocks('change')">Change ↕</th>
+          <th onclick="sortStocks('pct')">% Change ↕</th>
+          <th>High</th><th>Day Range</th>
         </tr></thead>
         <tbody id="stocks-body"><tr class="loading-row"><td colspan="7"><span class="spin"></span>Loading stocks...</td></tr></tbody>
       </table>
@@ -300,7 +307,8 @@ tbody td { padding:.75rem 1rem; font-size:.85rem; white-space:nowrap; }
 </div>
 <div class="toast" id="toast"></div>
 <script>
-const API = '/.netlify/functions/yf';
+const TD = '6646806448324968ac7ae08b2e2b5a60';
+const TDBASE = 'https://api.twelvedata.com';
 const COINGECKO = 'https://api.coingecko.com/api/v3';
 
 // ── NAV ──
@@ -318,40 +326,15 @@ function go(id) {
   if (id === 'etf' && !etfLoaded) loadETF();
 }
 
-// ── FETCH ──
-async function yfQuote(symbols) {
-  try {
-    const r = await fetch(`${API}?type=quote&symbols=${symbols.join(',')}`);
-    const d = await r.json();
-    return d?.quoteResponse?.result || [];
-  } catch { return []; }
-}
-
-async function yfChart(symbol, range, interval) {
-  try {
-    const r = await fetch(`${API}?type=chart&symbol=${encodeURIComponent(symbol)}&range=${range}&interval=${interval}`);
-    const d = await r.json();
-    return d?.chart?.result?.[0] || null;
-  } catch { return null; }
-}
-
-async function yfSearch(q) {
-  try {
-    const r = await fetch(`${API}?type=search&symbol=${encodeURIComponent(q)}`);
-    const d = await r.json();
-    return d?.quotes || [];
-  } catch { return []; }
-}
-
 // ── FORMATTERS ──
 function fmtP(n) {
   if (n == null || isNaN(n)) return '—';
-  return '₹' + n.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return '₹' + parseFloat(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function fmtC(chg, pct) {
   if (chg == null) return '<td class="td-muted">—</td><td class="td-muted">—</td>';
   const cls = chg >= 0 ? 'td-up' : 'td-down', sign = chg >= 0 ? '+' : '';
-  return `<td class="${cls}">${sign}${chg.toFixed(2)}</td><td class="${cls}">${sign}${pct?.toFixed(2)}%</td>`;
+  return `<td class="${cls}">${sign}${parseFloat(chg).toFixed(2)}</td><td class="${cls}">${sign}${parseFloat(pct).toFixed(2)}%</td>`;
 }
 function fmt(n) {
   if (n == null || isNaN(n)) return '—';
@@ -362,52 +345,99 @@ function fmt(n) {
 }
 function timeNow() { return 'Updated ' + new Date().toLocaleTimeString(); }
 
+// ── TWELVE DATA API ──
+async function tdQuote(symbols) {
+  // symbols = array like ['RELIANCE:NSE', 'TCS:NSE']
+  try {
+    const syms = symbols.join(',');
+    const r = await fetch(`${TDBASE}/quote?symbol=${encodeURIComponent(syms)}&apikey=${TD}`);
+    const d = await r.json();
+    // if single symbol returns object, multiple returns object with keys
+    if (symbols.length === 1) {
+      return d.status === 'ok' ? [d] : [];
+    }
+    return Object.values(d).filter(q => q.status === 'ok');
+  } catch { return []; }
+}
+
+async function tdTimeSeries(symbol, interval, outputsize) {
+  try {
+    const r = await fetch(`${TDBASE}/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=${outputsize}&apikey=${TD}`);
+    return await r.json();
+  } catch { return null; }
+}
+
+async function tdSearch(q) {
+  try {
+    const r = await fetch(`${TDBASE}/symbol_search?symbol=${encodeURIComponent(q)}&apikey=${TD}`);
+    const d = await r.json();
+    return d.data || [];
+  } catch { return []; }
+}
+
 // ── SYMBOLS ──
-const NSE_SYMBOLS = [
-  'RELIANCE.NS','TCS.NS','INFY.NS','HDFCBANK.NS','ICICIBANK.NS','HINDUNILVR.NS',
-  'ITC.NS','SBIN.NS','BHARTIARTL.NS','KOTAKBANK.NS','LT.NS','AXISBANK.NS',
-  'ASIANPAINT.NS','WIPRO.NS','BAJFINANCE.NS','MARUTI.NS','SUNPHARMA.NS',
-  'TITAN.NS','ULTRACEMCO.NS','NESTLEIND.NS','TECHM.NS','HCLTECH.NS',
-  'POWERGRID.NS','NTPC.NS','TATAMOTORS.NS','ONGC.NS','TATASTEEL.NS',
-  'ADANIENT.NS','ADANIPORTS.NS','BAJAJFINSV.NS','DRREDDY.NS','CIPLA.NS',
-  'EICHERMOT.NS','COALINDIA.NS','HINDALCO.NS','JSWSTEEL.NS','M&M.NS',
-  'GRASIM.NS','INDUSINDBK.NS','BPCL.NS','DIVISLAB.NS'
+const NSE_SYMS = [
+  'RELIANCE:NSE','TCS:NSE','INFY:NSE','HDFCBANK:NSE','ICICIBANK:NSE',
+  'HINDUNILVR:NSE','ITC:NSE','SBIN:NSE','BHARTIARTL:NSE','KOTAKBANK:NSE',
+  'LT:NSE','AXISBANK:NSE','ASIANPAINT:NSE','WIPRO:NSE','BAJFINANCE:NSE',
+  'MARUTI:NSE','SUNPHARMA:NSE','TITAN:NSE','ULTRACEMCO:NSE','NESTLEIND:NSE',
+  'TECHM:NSE','HCLTECH:NSE','POWERGRID:NSE','NTPC:NSE','TATAMOTORS:NSE',
+  'ONGC:NSE','TATASTEEL:NSE','ADANIENT:NSE','ADANIPORTS:NSE','BAJAJFINSV:NSE',
+  'DRREDDY:NSE','CIPLA:NSE','EICHERMOT:NSE','COALINDIA:NSE','HINDALCO:NSE',
+  'JSWSTEEL:NSE','M&M:NSE','GRASIM:NSE','INDUSINDBK:NSE','BPCL:NSE'
 ];
 const NAMES = {
-  'RELIANCE.NS':'Reliance Industries','TCS.NS':'TCS','INFY.NS':'Infosys',
-  'HDFCBANK.NS':'HDFC Bank','ICICIBANK.NS':'ICICI Bank','HINDUNILVR.NS':'Hindustan Unilever',
-  'ITC.NS':'ITC','SBIN.NS':'SBI','BHARTIARTL.NS':'Bharti Airtel',
-  'KOTAKBANK.NS':'Kotak Bank','LT.NS':'L&T','AXISBANK.NS':'Axis Bank',
-  'ASIANPAINT.NS':'Asian Paints','WIPRO.NS':'Wipro','BAJFINANCE.NS':'Bajaj Finance',
-  'MARUTI.NS':'Maruti Suzuki','SUNPHARMA.NS':'Sun Pharma','TITAN.NS':'Titan',
-  'ULTRACEMCO.NS':'UltraTech Cement','NESTLEIND.NS':'Nestle India',
-  'TECHM.NS':'Tech Mahindra','HCLTECH.NS':'HCL Tech','POWERGRID.NS':'Power Grid',
-  'NTPC.NS':'NTPC','TATAMOTORS.NS':'Tata Motors','ONGC.NS':'ONGC',
-  'TATASTEEL.NS':'Tata Steel','ADANIENT.NS':'Adani Enterprises',
-  'ADANIPORTS.NS':'Adani Ports','BAJAJFINSV.NS':'Bajaj Finserv',
-  'DRREDDY.NS':"Dr Reddy's",'CIPLA.NS':'Cipla','EICHERMOT.NS':'Eicher Motors',
-  'COALINDIA.NS':'Coal India','HINDALCO.NS':'Hindalco','JSWSTEEL.NS':'JSW Steel',
-  'M&M.NS':'Mahindra & Mahindra','GRASIM.NS':'Grasim','INDUSINDBK.NS':'IndusInd Bank',
-  'BPCL.NS':'BPCL','DIVISLAB.NS':"Divi's Lab"
+  'RELIANCE:NSE':'Reliance Industries','TCS:NSE':'TCS','INFY:NSE':'Infosys',
+  'HDFCBANK:NSE':'HDFC Bank','ICICIBANK:NSE':'ICICI Bank','HINDUNILVR:NSE':'Hindustan Unilever',
+  'ITC:NSE':'ITC','SBIN:NSE':'SBI','BHARTIARTL:NSE':'Bharti Airtel',
+  'KOTAKBANK:NSE':'Kotak Bank','LT:NSE':'L&T','AXISBANK:NSE':'Axis Bank',
+  'ASIANPAINT:NSE':'Asian Paints','WIPRO:NSE':'Wipro','BAJFINANCE:NSE':'Bajaj Finance',
+  'MARUTI:NSE':'Maruti Suzuki','SUNPHARMA:NSE':'Sun Pharma','TITAN:NSE':'Titan',
+  'ULTRACEMCO:NSE':'UltraTech Cement','NESTLEIND:NSE':'Nestle India',
+  'TECHM:NSE':'Tech Mahindra','HCLTECH:NSE':'HCL Tech','POWERGRID:NSE':'Power Grid',
+  'NTPC:NSE':'NTPC','TATAMOTORS:NSE':'Tata Motors','ONGC:NSE':'ONGC',
+  'TATASTEEL:NSE':'Tata Steel','ADANIENT:NSE':'Adani Enterprises',
+  'ADANIPORTS:NSE':'Adani Ports','BAJAJFINSV:NSE':'Bajaj Finserv',
+  'DRREDDY:NSE':"Dr Reddy's",'CIPLA:NSE':'Cipla','EICHERMOT:NSE':'Eicher Motors',
+  'COALINDIA:NSE':'Coal India','HINDALCO:NSE':'Hindalco','JSWSTEEL:NSE':'JSW Steel',
+  'M&M:NSE':'Mahindra & Mahindra','GRASIM:NSE':'Grasim','INDUSINDBK:NSE':'IndusInd Bank',
+  'BPCL:NSE':'BPCL'
 };
-const HOME_CARDS = ['RELIANCE.NS','TCS.NS','INFY.NS','HDFCBANK.NS','ICICIBANK.NS','SBIN.NS','ITC.NS','BAJFINANCE.NS'];
-const INDEX_SYMS = [
-  {sym:'^NSEI',name:'Nifty 50'},{sym:'^BSESN',name:'BSE Sensex'},
-  {sym:'^NSEBANK',name:'Bank Nifty'},{sym:'^CNXIT',name:'Nifty IT'},
-  {sym:'^CNXFMCG',name:'Nifty FMCG'},{sym:'^CNXPHARMA',name:'Nifty Pharma'},
-  {sym:'^CNXAUTO',name:'Nifty Auto'},{sym:'^CNXMETAL',name:'Nifty Metal'},
-  {sym:'^CNXREALTY',name:'Nifty Realty'},{sym:'^CNXENERGY',name:'Nifty Energy'},
-  {sym:'^CNXMIDCAP',name:'Nifty Midcap 100'},{sym:'^NIFTYSMALLCAP100',name:'Nifty Smallcap 100'}
-];
+const HOME_CARDS = ['RELIANCE:NSE','TCS:NSE','INFY:NSE','HDFCBANK:NSE','ICICIBANK:NSE','SBIN:NSE','ITC:NSE','BAJFINANCE:NSE'];
 const ETF_SYMS = [
-  {sym:'NIFTYBEES.NS',name:'Nippon Nifty BeES'},{sym:'BANKBEES.NS',name:'Nippon Bank BeES'},
-  {sym:'JUNIORBEES.NS',name:'Nippon Junior BeES'},{sym:'GOLDBEES.NS',name:'Nippon Gold BeES'},
-  {sym:'LIQUIDBEES.NS',name:'Nippon Liquid BeES'},{sym:'ITBEES.NS',name:'Nippon IT BeES'},
-  {sym:'SETFNIF50.NS',name:'SBI ETF Nifty 50'},{sym:'MOM100.NS',name:'Motilal Midcap 100 ETF'},
-  {sym:'CPSEETF.NS',name:'Nippon CPSE ETF'},{sym:'HDFCSENSEX.NS',name:'HDFC Sensex ETF'},
-  {sym:'SILVERBEES.NS',name:'Nippon Silver ETF'},{sym:'PSUBNKBEES.NS',name:'Nippon PSU Bank BeES'}
+  {sym:'NIFTYBEES:NSE',name:'Nippon Nifty BeES'},
+  {sym:'BANKBEES:NSE',name:'Nippon Bank BeES'},
+  {sym:'JUNIORBEES:NSE',name:'Nippon Junior BeES'},
+  {sym:'GOLDBEES:NSE',name:'Nippon Gold BeES'},
+  {sym:'LIQUIDBEES:NSE',name:'Nippon Liquid BeES'},
+  {sym:'ITBEES:NSE',name:'Nippon IT BeES'},
+  {sym:'SETFNIF50:NSE',name:'SBI ETF Nifty 50'},
+  {sym:'CPSEETF:NSE',name:'Nippon CPSE ETF'},
+  {sym:'SILVERBEES:NSE',name:'Nippon Silver ETF'},
+  {sym:'PSUBNKBEES:NSE',name:'Nippon PSU Bank BeES'}
 ];
-const FOREX_SYMS = ['USDINR=X','EURINR=X','GBPINR=X','JPYINR=X','AUDINR=X','CADINR=X','CHFINR=X','SGDINR=X','HKDINR=X','CNYINR=X','AEDINR=X','SARINR=X'];
+const INDEX_SYMS = [
+  {sym:'NIFTY:NSE',name:'Nifty 50'},
+  {sym:'SENSEX:BSE',name:'BSE Sensex'},
+  {sym:'BANKNIFTY:NSE',name:'Bank Nifty'},
+  {sym:'NIFTYIT:NSE',name:'Nifty IT'},
+  {sym:'NIFTYFMCG:NSE',name:'Nifty FMCG'},
+  {sym:'NIFTYPHARMA:NSE',name:'Nifty Pharma'},
+  {sym:'NIFTYAUTO:NSE',name:'Nifty Auto'},
+  {sym:'NIFTYMETAL:NSE',name:'Nifty Metal'},
+  {sym:'NIFTYREALTY:NSE',name:'Nifty Realty'},
+  {sym:'NIFTYMIDCAP100:NSE',name:'Nifty Midcap 100'}
+];
+const FOREX_PAIRS = [
+  {sym:'USD/INR',name:'USD/INR'},{sym:'EUR/INR',name:'EUR/INR'},
+  {sym:'GBP/INR',name:'GBP/INR'},{sym:'JPY/INR',name:'JPY/INR'},
+  {sym:'AUD/INR',name:'AUD/INR'},{sym:'CAD/INR',name:'CAD/INR'},
+  {sym:'CHF/INR',name:'CHF/INR'},{sym:'SGD/INR',name:'SGD/INR'},
+  {sym:'HKD/INR',name:'HKD/INR'},{sym:'CNY/INR',name:'CNY/INR'},
+  {sym:'AED/INR',name:'AED/INR'},{sym:'SAR/INR',name:'SAR/INR'}
+];
+
+function shortSym(s) { return s.split(':')[0]; }
 
 // ── MARKET CARDS ──
 async function loadMarketCards() {
@@ -415,35 +445,42 @@ async function loadMarketCards() {
   grid.innerHTML = HOME_CARDS.map(s => `
     <div class="market-card" id="mc-${s.replace(/[^a-z0-9]/gi,'_')}" onclick="openDetail('${s}')">
       <div class="mc-label">NSE</div>
-      <div class="mc-name">${NAMES[s]||s.replace('.NS','')}</div>
+      <div class="mc-name">${NAMES[s]||shortSym(s)}</div>
       <div class="mc-price mc-loading"><span class="spin"></span></div>
       <div class="mc-change"></div>
     </div>`).join('');
-  const quotes = await yfQuote(HOME_CARDS);
-  quotes.forEach(q => {
-    const el = document.getElementById('mc-' + q.symbol.replace(/[^a-z0-9]/gi,'_'));
-    if (!el || !q.regularMarketPrice) return;
-    const cls = q.regularMarketChangePercent >= 0 ? 'up' : 'down';
-    const sign = q.regularMarketChangePercent >= 0 ? '+' : '';
-    el.querySelector('.mc-price').innerHTML = fmtP(q.regularMarketPrice);
-    el.querySelector('.mc-price').classList.remove('mc-loading');
-    el.querySelector('.mc-change').innerHTML = `<span class="${cls}">${sign}${q.regularMarketChangePercent?.toFixed(2)}%</span>`;
-    el.style.borderColor = q.regularMarketChangePercent >= 0 ? 'rgba(14,203,129,0.3)' : 'rgba(246,70,93,0.3)';
-  });
+
+  // Load in batches due to rate limits
+  for (let i=0; i<HOME_CARDS.length; i+=4) {
+    const batch = await tdQuote(HOME_CARDS.slice(i,i+4));
+    batch.forEach(q => {
+      const sym = q.symbol + ':' + q.exchange;
+      const el = document.getElementById('mc-' + sym.replace(/[^a-z0-9]/gi,'_'));
+      if (!el || !q.close) return;
+      const price = parseFloat(q.close);
+      const pct = parseFloat(q.percent_change);
+      const cls = pct >= 0 ? 'up' : 'down', sign = pct >= 0 ? '+' : '';
+      el.querySelector('.mc-price').textContent = fmtP(price);
+      el.querySelector('.mc-price').classList.remove('mc-loading');
+      el.querySelector('.mc-change').innerHTML = `<span class="${cls}">${sign}${pct.toFixed(2)}%</span>`;
+      el.style.borderColor = pct >= 0 ? 'rgba(14,203,129,0.3)' : 'rgba(246,70,93,0.3)';
+    });
+    await new Promise(r => setTimeout(r, 200));
+  }
 }
 
 // ── TICKER ──
 async function loadTicker() {
-  const quotes = await yfQuote(HOME_CARDS);
+  const quotes = await tdQuote(HOME_CARDS.slice(0,6));
   if (!quotes.length) return;
   const items = quotes.map(q => {
-    const pct = q.regularMarketChangePercent;
+    const pct = parseFloat(q.percent_change||0);
     const cls = pct >= 0 ? 'up' : 'down', sign = pct >= 0 ? '+' : '';
-    const name = NAMES[q.symbol] || q.symbol.replace('.NS','');
-    return `<div class="ticker-item" onclick="openDetail('${q.symbol}')">
-      <span class="ticker-symbol">${name}</span>
-      <span class="ticker-price">${fmtP(q.regularMarketPrice)}</span>
-      <span class="ticker-change ${cls}">${sign}${pct?.toFixed(2)}%</span>
+    const sym = q.symbol + ':' + q.exchange;
+    return `<div class="ticker-item" onclick="openDetail('${sym}')">
+      <span class="ticker-symbol">${q.symbol}</span>
+      <span class="ticker-price">${fmtP(q.close)}</span>
+      <span class="ticker-change ${cls}">${sign}${pct.toFixed(2)}%</span>
     </div>`;
   }).join('');
   document.getElementById('ticker-inner').innerHTML = items + items;
@@ -451,17 +488,23 @@ async function loadTicker() {
 
 // ── MOVERS ──
 async function loadMovers() {
-  const quotes = await yfQuote(NSE_SYMBOLS.slice(0,15));
+  const syms = NSE_SYMS.slice(0,8);
+  const quotes = await tdQuote(syms);
   const tbody = document.getElementById('movers-india');
-  tbody.innerHTML = quotes.sort((a,b) => Math.abs(b.regularMarketChangePercent) - Math.abs(a.regularMarketChangePercent))
-    .map(q => `<tr onclick="openDetail('${q.symbol}')">
-      <td class="td-symbol">${q.symbol.replace('.NS','')}</td>
-      <td class="td-name">${NAMES[q.symbol]||q.symbol.replace('.NS','')}</td>
-      <td class="td-price">${fmtP(q.regularMarketPrice)}</td>
-      ${fmtC(q.regularMarketChange, q.regularMarketChangePercent)}
-      <td class="td-muted">${fmtP(q.regularMarketDayHigh)}</td>
-      <td class="td-muted">${fmtP(q.regularMarketDayLow)}</td>
-    </tr>`).join('') || '<tr><td colspan="7" class="td-muted">Could not load data</td></tr>';
+  if (!quotes.length) { tbody.innerHTML = '<tr><td colspan="7" class="td-muted">Could not load data</td></tr>'; return; }
+  tbody.innerHTML = quotes.sort((a,b) => Math.abs(parseFloat(b.percent_change||0)) - Math.abs(parseFloat(a.percent_change||0)))
+    .map(q => {
+      const sym = q.symbol + ':' + q.exchange;
+      const chg = parseFloat(q.change||0), pct = parseFloat(q.percent_change||0);
+      return `<tr onclick="openDetail('${sym}')">
+        <td class="td-symbol">${q.symbol}</td>
+        <td class="td-name">${NAMES[sym]||q.name||q.symbol}</td>
+        <td class="td-price">${fmtP(q.close)}</td>
+        ${fmtC(chg,pct)}
+        <td class="td-muted">${fmtP(q.high)}</td>
+        <td class="td-muted">${fmtP(q.low)}</td>
+      </tr>`;
+    }).join('');
   document.getElementById('movers-updated').textContent = timeNow();
 }
 
@@ -470,27 +513,25 @@ async function openDetail(symbol) {
   const panel = document.getElementById('detail-panel');
   panel.classList.add('open');
   panel.scrollIntoView({behavior:'smooth'});
-  document.getElementById('dp-symbol').textContent = symbol.replace('.NS','').replace('^','');
+  document.getElementById('dp-symbol').textContent = shortSym(symbol);
   document.getElementById('dp-name').textContent = NAMES[symbol] || 'Loading...';
   document.getElementById('dp-price').textContent = '—';
   document.getElementById('dp-change').innerHTML = '—';
   document.getElementById('dp-stats').innerHTML = '';
 
-  const quotes = await yfQuote([symbol]);
+  const quotes = await tdQuote([symbol]);
   if (!quotes.length) return;
   const q = quotes[0];
-  const pct = q.regularMarketChangePercent, chg = q.regularMarketChange;
+  const pct = parseFloat(q.percent_change||0), chg = parseFloat(q.change||0);
   const cls = pct >= 0 ? 'up' : 'down', sign = pct >= 0 ? '+' : '';
-  document.getElementById('dp-name').textContent = q.longName || q.shortName || NAMES[symbol] || symbol;
-  document.getElementById('dp-price').textContent = fmtP(q.regularMarketPrice);
-  document.getElementById('dp-change').innerHTML = `<span class="${cls}">${sign}${chg?.toFixed(2)} (${sign}${pct?.toFixed(2)}%)</span>`;
+  document.getElementById('dp-name').textContent = q.name || NAMES[symbol] || symbol;
+  document.getElementById('dp-price').textContent = fmtP(q.close);
+  document.getElementById('dp-change').innerHTML = `<span class="${cls}">${sign}${chg.toFixed(2)} (${sign}${pct.toFixed(2)}%)</span>`;
   const stats = [
-    ['Open', fmtP(q.regularMarketOpen)],['High', fmtP(q.regularMarketDayHigh)],
-    ['Low', fmtP(q.regularMarketDayLow)],['Prev Close', fmtP(q.regularMarketPreviousClose)],
-    ['Volume', q.regularMarketVolume?.toLocaleString('en-IN')||'—'],
-    ['Avg Volume', q.averageVolume?.toLocaleString('en-IN')||'—'],
-    ['Mkt Cap', fmt(q.marketCap)],['52W High', fmtP(q.fiftyTwoWeekHigh)],
-    ['52W Low', fmtP(q.fiftyTwoWeekLow)],['P/E Ratio', q.trailingPE?.toFixed(2)||'—'],
+    ['Open', fmtP(q.open)],['High', fmtP(q.high)],['Low', fmtP(q.low)],
+    ['Prev Close', fmtP(q.previous_close)],['Volume', parseInt(q.volume||0).toLocaleString('en-IN')],
+    ['52W High', fmtP(q['52_week']?.high)],['52W Low', fmtP(q['52_week']?.low)],
+    ['P/E Ratio', q.pe||'—'],['Exchange', q.exchange||'NSE'],['Currency', q.currency||'INR'],
   ];
   document.getElementById('dp-stats').innerHTML = stats.map(([l,v]) =>
     `<div class="dp-stat"><div class="dp-stat-label">${l}</div><div class="dp-stat-val">${v}</div></div>`
@@ -505,35 +546,37 @@ function closeDetail() {
 // ── STOCKS ──
 let stocksLoaded=false, stocksData=[], stocksSortKey='pct', stocksSortAsc=false;
 async function loadStocks() {
-  stocksLoaded = true;
-  document.getElementById('stocks-body').innerHTML = '<tr class="loading-row"><td colspan="7"><span class="spin"></span>Loading NSE stocks...</td></tr>';
-  let all = [];
-  for (let i=0; i<NSE_SYMBOLS.length; i+=20) {
-    const batch = await yfQuote(NSE_SYMBOLS.slice(i,i+20));
-    all = all.concat(batch);
+  stocksLoaded=true;
+  document.getElementById('stocks-body').innerHTML='<tr class="loading-row"><td colspan="7"><span class="spin"></span>Loading NSE stocks...</td></tr>';
+  let all=[];
+  for (let i=0;i<NSE_SYMS.length;i+=8) {
+    const batch = await tdQuote(NSE_SYMS.slice(i,i+8));
+    all=all.concat(batch);
     if (i===0) renderStocksTable(all);
+    await new Promise(r=>setTimeout(r,300));
   }
-  stocksData = all;
+  stocksData=all;
   renderStocksTable(all);
-  document.getElementById('stocks-last-updated').textContent = timeNow();
+  document.getElementById('stocks-last-updated').textContent=timeNow();
 }
 function renderStocksTable(data) {
-  const s = document.getElementById('stocks-search')?.value.toLowerCase()||'';
-  let filtered = data.filter(q => !s || q.symbol.toLowerCase().includes(s) || (NAMES[q.symbol]||'').toLowerCase().includes(s));
-  filtered.sort((a,b) => {
-    const m = {symbol:[a.symbol,b.symbol],pct:[a.regularMarketChangePercent,b.regularMarketChangePercent],price:[a.regularMarketPrice,b.regularMarketPrice],change:[a.regularMarketChange,b.regularMarketChange]};
-    const [av,bv] = m[stocksSortKey]||[a.regularMarketChangePercent,b.regularMarketChangePercent];
+  const s=document.getElementById('stocks-search')?.value.toLowerCase()||'';
+  let filtered=data.filter(q=>!s||q.symbol.toLowerCase().includes(s)||(NAMES[q.symbol+':'+q.exchange]||'').toLowerCase().includes(s));
+  filtered.sort((a,b)=>{
+    const m={symbol:[a.symbol,b.symbol],pct:[parseFloat(a.percent_change||0),parseFloat(b.percent_change||0)],price:[parseFloat(a.close||0),parseFloat(b.close||0)],change:[parseFloat(a.change||0),parseFloat(b.change||0)]};
+    const [av,bv]=m[stocksSortKey]||[parseFloat(a.percent_change||0),parseFloat(b.percent_change||0)];
     if (typeof av==='string') return stocksSortAsc?av.localeCompare(bv):bv.localeCompare(av);
     return stocksSortAsc?av-bv:bv-av;
   });
-  document.getElementById('stocks-body').innerHTML = filtered.map(q => {
-    const lo=q.regularMarketDayLow, hi=q.regularMarketDayHigh, cur=q.regularMarketPrice;
-    const rp = lo&&hi ? ((cur-lo)/(hi-lo)*100).toFixed(0) : 50;
-    return `<tr onclick="openDetail('${q.symbol}')">
-      <td class="td-symbol">${q.symbol.replace('.NS','')}</td>
-      <td class="td-name">${NAMES[q.symbol]||q.symbol.replace('.NS','')}</td>
+  document.getElementById('stocks-body').innerHTML=filtered.map(q=>{
+    const sym=q.symbol+':'+q.exchange;
+    const lo=parseFloat(q.low||0),hi=parseFloat(q.high||0),cur=parseFloat(q.close||0);
+    const rp=lo&&hi?((cur-lo)/(hi-lo)*100).toFixed(0):50;
+    return `<tr onclick="openDetail('${sym}')">
+      <td class="td-symbol">${q.symbol}</td>
+      <td class="td-name">${NAMES[sym]||q.name||q.symbol}</td>
       <td class="td-price">${fmtP(cur)}</td>
-      ${fmtC(q.regularMarketChange,q.regularMarketChangePercent)}
+      ${fmtC(parseFloat(q.change||0),parseFloat(q.percent_change||0))}
       <td class="td-muted">${fmtP(hi)}</td>
       <td><div style="display:flex;align-items:center;gap:6px;min-width:120px">
         <span style="font-size:.72rem;color:var(--muted)">${fmtP(lo)}</span>
@@ -550,60 +593,68 @@ function filterStocksTable(){renderStocksTable(stocksData);}
 
 // ── INDICES ──
 async function loadIndices() {
-  const grid = document.getElementById('indices-grid');
-  grid.innerHTML = INDEX_SYMS.map(m=>`
+  const grid=document.getElementById('indices-grid');
+  grid.innerHTML=INDEX_SYMS.map(m=>`
     <div class="market-card" id="idx-${m.sym.replace(/[^a-z0-9]/gi,'_')}">
       <div class="mc-label">Index</div>
       <div class="mc-name">${m.name}</div>
       <div class="mc-price mc-loading"><span class="spin"></span></div>
       <div class="mc-change"></div>
     </div>`).join('');
-  const quotes = await yfQuote(INDEX_SYMS.map(m=>m.sym));
-  quotes.forEach(q => {
-    const el = document.getElementById('idx-'+q.symbol.replace(/[^a-z0-9]/gi,'_'));
-    if (!el||!q.regularMarketPrice) return;
-    const cls=q.regularMarketChangePercent>=0?'up':'down', sign=q.regularMarketChangePercent>=0?'+':'';
-    el.querySelector('.mc-price').textContent = q.regularMarketPrice.toLocaleString('en-IN',{maximumFractionDigits:2});
-    el.querySelector('.mc-price').classList.remove('mc-loading');
-    el.querySelector('.mc-change').innerHTML=`<span class="${cls}">${sign}${q.regularMarketChangePercent?.toFixed(2)}%</span>`;
-    el.style.borderColor=q.regularMarketChangePercent>=0?'rgba(14,203,129,0.3)':'rgba(246,70,93,0.3)';
-    el.onclick=()=>openDetail(q.symbol);
-  });
+  for (let i=0;i<INDEX_SYMS.length;i+=4) {
+    const batch=await tdQuote(INDEX_SYMS.slice(i,i+4).map(m=>m.sym));
+    batch.forEach(q=>{
+      const sym=q.symbol+':'+(q.exchange||'NSE');
+      const m=INDEX_SYMS.find(x=>x.sym===sym||x.sym.startsWith(q.symbol+':'));
+      if (!m) return;
+      const el=document.getElementById('idx-'+m.sym.replace(/[^a-z0-9]/gi,'_'));
+      if (!el||!q.close) return;
+      const pct=parseFloat(q.percent_change||0);
+      const cls=pct>=0?'up':'down',sign=pct>=0?'+':'';
+      el.querySelector('.mc-price').textContent=parseFloat(q.close).toLocaleString('en-IN',{maximumFractionDigits:2});
+      el.querySelector('.mc-price').classList.remove('mc-loading');
+      el.querySelector('.mc-change').innerHTML=`<span class="${cls}">${sign}${pct.toFixed(2)}%</span>`;
+      el.style.borderColor=pct>=0?'rgba(14,203,129,0.3)':'rgba(246,70,93,0.3)';
+      el.onclick=()=>openDetail(m.sym);
+    });
+    await new Promise(r=>setTimeout(r,200));
+  }
 }
 
 // ── ETF ──
-let etfLoaded=false, etfData=[];
+let etfLoaded=false,etfData=[];
 async function loadETF() {
   etfLoaded=true;
   document.getElementById('etf-body').innerHTML='<tr class="loading-row"><td colspan="6"><span class="spin"></span>Loading ETFs...</td></tr>';
-  const quotes = await yfQuote(ETF_SYMS.map(e=>e.sym));
-  etfData = quotes;
+  const quotes=await tdQuote(ETF_SYMS.map(e=>e.sym));
+  etfData=quotes;
   renderETF(quotes);
 }
 function renderETF(data) {
   const s=document.getElementById('etf-search')?.value.toLowerCase()||'';
-  const f=data.filter(q=>!s||q.symbol.toLowerCase().includes(s)||(ETF_SYMS.find(e=>e.sym===q.symbol)?.name||'').toLowerCase().includes(s));
+  const f=data.filter(q=>!s||q.symbol.toLowerCase().includes(s)||(ETF_SYMS.find(e=>e.sym.startsWith(q.symbol+':'))?.name||'').toLowerCase().includes(s));
   document.getElementById('etf-body').innerHTML=f.map(q=>{
-    const name=ETF_SYMS.find(e=>e.sym===q.symbol)?.name||q.symbol.replace('.NS','');
-    return `<tr onclick="openDetail('${q.symbol}')">
-      <td class="td-symbol">${q.symbol.replace('.NS','')}</td>
+    const sym=q.symbol+':'+(q.exchange||'NSE');
+    const name=ETF_SYMS.find(e=>e.sym.startsWith(q.symbol+':'))?.name||q.symbol;
+    return `<tr onclick="openDetail('${sym}')">
+      <td class="td-symbol">${q.symbol}</td>
       <td class="td-name">${name}</td>
-      <td class="td-price">${fmtP(q.regularMarketPrice)}</td>
-      ${fmtC(q.regularMarketChange,q.regularMarketChangePercent)}
-      <td class="td-muted">${fmtP(q.regularMarketDayHigh)} / ${fmtP(q.regularMarketDayLow)}</td>
+      <td class="td-price">${fmtP(q.close)}</td>
+      ${fmtC(parseFloat(q.change||0),parseFloat(q.percent_change||0))}
+      <td class="td-muted">${fmtP(q.high)} / ${fmtP(q.low)}</td>
     </tr>`;
   }).join('')||'<tr><td colspan="6" class="td-muted" style="padding:1rem">No results</td></tr>';
 }
 function filterETF(){renderETF(etfData);}
 
 // ── CRYPTO ──
-let cryptoLoaded=false, cryptoData=[];
+let cryptoLoaded=false,cryptoData=[];
 async function loadCrypto() {
   cryptoLoaded=true;
   document.getElementById('crypto-body').innerHTML='<tr class="loading-row"><td colspan="8"><span class="spin"></span>Loading crypto...</td></tr>';
   try {
-    const r = await fetch(`${COINGECKO}/coins/markets?vs_currency=inr&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=7d`);
-    cryptoData = await r.json();
+    const r=await fetch(`${COINGECKO}/coins/markets?vs_currency=inr&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=7d`);
+    cryptoData=await r.json();
     renderCrypto(cryptoData);
     renderCryptoMini(cryptoData.slice(0,8));
     document.getElementById('crypto-last-updated').textContent=timeNow();
@@ -613,7 +664,7 @@ function renderCrypto(data) {
   const s=document.getElementById('crypto-search')?.value.toLowerCase()||'';
   const f=data.filter(c=>!s||c.symbol.toLowerCase().includes(s)||c.name.toLowerCase().includes(s));
   document.getElementById('crypto-body').innerHTML=f.map(c=>{
-    const p24=c.price_change_percentage_24h, p7=c.price_change_percentage_7d_in_currency;
+    const p24=c.price_change_percentage_24h,p7=c.price_change_percentage_7d_in_currency;
     const price=c.current_price>=1?'₹'+c.current_price.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'₹'+c.current_price.toFixed(6);
     return `<tr>
       <td class="td-muted">${c.market_cap_rank}</td>
@@ -632,7 +683,7 @@ function renderCrypto(data) {
 }
 function renderCryptoMini(data) {
   document.getElementById('crypto-mini').innerHTML=data.map(c=>{
-    const p=c.price_change_percentage_24h, cls=p>=0?'td-up':'td-down', sign=p>=0?'+':'';
+    const p=c.price_change_percentage_24h,cls=p>=0?'td-up':'td-down',sign=p>=0?'+':'';
     const price=c.current_price>=1?'₹'+c.current_price.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}):'₹'+c.current_price.toFixed(4);
     return `<tr onclick="go('crypto')"><td><div style="font-weight:600">${c.symbol.toUpperCase()}</div><div style="font-size:.72rem;color:var(--muted)">${c.name}</div></td><td class="td-price">${price}</td><td class="${cls}">${sign}${p?.toFixed(2)}%</td></tr>`;
   }).join('');
@@ -641,87 +692,98 @@ function filterCrypto(){renderCrypto(cryptoData);}
 
 // ── FOREX ──
 let forexLoaded=false;
-const FOREX_NAMES={'USDINR=X':'USD/INR','EURINR=X':'EUR/INR','GBPINR=X':'GBP/INR','JPYINR=X':'JPY/INR','AUDINR=X':'AUD/INR','CADINR=X':'CAD/INR','CHFINR=X':'CHF/INR','SGDINR=X':'SGD/INR','HKDINR=X':'HKD/INR','CNYINR=X':'CNY/INR','AEDINR=X':'AED/INR','SARINR=X':'SAR/INR'};
 async function loadForex() {
   forexLoaded=true;
   document.getElementById('forex-body').innerHTML='<tr class="loading-row"><td colspan="6"><span class="spin"></span>Loading currencies...</td></tr>';
-  const quotes = await yfQuote(FOREX_SYMS);
-  if (!quotes.length) { document.getElementById('forex-body').innerHTML='<tr><td colspan="6" class="error-msg">Could not load forex data</td></tr>'; return; }
-  document.getElementById('forex-body').innerHTML=quotes.map(q=>`<tr>
-    <td class="td-symbol">${FOREX_NAMES[q.symbol]||q.symbol.replace('=X','')}</td>
-    <td class="td-price">₹${q.regularMarketPrice?.toFixed(4)}</td>
-    ${fmtC(q.regularMarketChange,q.regularMarketChangePercent)}
-    <td class="td-muted">₹${q.regularMarketDayHigh?.toFixed(4)}</td>
-    <td class="td-muted">₹${q.regularMarketDayLow?.toFixed(4)}</td>
-  </tr>`).join('');
-  renderForexMini(quotes);
-  document.getElementById('forex-last-updated').textContent=timeNow();
+  try {
+    const syms=FOREX_PAIRS.map(p=>p.sym).join(',');
+    const r=await fetch(`${TDBASE}/exchange_rate?symbol=${encodeURIComponent(syms)}&apikey=${TD}`);
+    const d=await r.json();
+    const rates=Array.isArray(d)?d:Object.values(d);
+    if (!rates.length) throw new Error('No data');
+    document.getElementById('forex-body').innerHTML=rates.map(q=>{
+      const rate=parseFloat(q.rate||0);
+      return `<tr>
+        <td class="td-symbol">${q.symbol||'—'}</td>
+        <td class="td-price">₹${rate.toFixed(4)}</td>
+        <td class="td-muted">—</td><td class="td-muted">—</td>
+        <td class="td-muted">—</td><td class="td-muted">—</td>
+      </tr>`;
+    }).join('');
+    renderForexMini(rates);
+    document.getElementById('forex-last-updated').textContent=timeNow();
+  } catch {
+    document.getElementById('forex-body').innerHTML='<tr><td colspan="6" class="error-msg">Could not load forex data</td></tr>';
+  }
 }
 function renderForexMini(data) {
   document.getElementById('forex-mini').innerHTML=data.slice(0,6).map(q=>{
-    const p=q.regularMarketChangePercent, cls=p>=0?'td-up':'td-down', sign=p>=0?'+':'';
-    return `<tr onclick="go('currencies')"><td class="td-symbol">${FOREX_NAMES[q.symbol]||q.symbol}</td><td>₹${q.regularMarketPrice?.toFixed(4)}</td><td class="${cls}">${sign}${p?.toFixed(2)}%</td></tr>`;
+    return `<tr onclick="go('currencies')"><td class="td-symbol">${q.symbol||'—'}</td><td>₹${parseFloat(q.rate||0).toFixed(4)}</td><td class="td-muted">—</td></tr>`;
   }).join('');
 }
 
 // ── SEARCH ──
 let searchTimeout;
-document.getElementById('search-input').addEventListener('input', function() {
+document.getElementById('search-input').addEventListener('input',function(){
   clearTimeout(searchTimeout);
   const q=this.value.trim();
-  if (!q) { document.getElementById('search-results').classList.remove('open'); return; }
+  if (!q){document.getElementById('search-results').classList.remove('open');return;}
   searchTimeout=setTimeout(()=>doSearch(q),400);
 });
-document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) document.getElementById('search-results').classList.remove('open'); });
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))document.getElementById('search-results').classList.remove('open');});
 async function doSearch(query) {
   const res=document.getElementById('search-results');
   res.classList.add('open');
   res.innerHTML='<div style="padding:.7rem 1rem;color:var(--muted);font-size:.82rem"><span class="spin"></span> Searching...</div>';
-  const results = await yfSearch(query);
-  if (!results.length) { res.innerHTML='<div style="padding:.7rem 1rem;color:var(--muted);font-size:.82rem">No results found</div>'; return; }
-  res.innerHTML=results.slice(0,8).map(q=>`
-    <div class="search-result-item" onclick="selectSearch('${q.symbol}','${(q.longname||q.shortname||'').replace(/'/g,'')}')">
-      <div class="sri-left"><span class="sri-symbol">${q.symbol}</span><span class="sri-name">${q.longname||q.shortname||''}</span></div>
-      <span class="td-badge badge-stock">${q.quoteType||'EQ'}</span>
+  const results=await tdSearch(query);
+  if (!results.length){res.innerHTML='<div style="padding:.7rem 1rem;color:var(--muted);font-size:.82rem">No results found</div>';return;}
+  const indian=results.filter(r=>r.exchange==='NSE'||r.exchange==='BSE').slice(0,8);
+  const final=indian.length?indian:results.slice(0,8);
+  res.innerHTML=final.map(q=>`
+    <div class="search-result-item" onclick="selectSearch('${q.symbol}:${q.exchange}','${(q.instrument_name||q.symbol).replace(/'/g,'')}')">
+      <div class="sri-left"><span class="sri-symbol">${q.symbol}</span><span class="sri-name">${q.instrument_name||q.symbol}</span></div>
+      <span class="td-badge badge-stock">${q.exchange||'NSE'}</span>
     </div>`).join('');
 }
-async function selectSearch(symbol, name) {
+async function selectSearch(symbol,name) {
   document.getElementById('search-results').classList.remove('open');
   document.getElementById('search-input').value='';
-  if (!watchlist.includes(symbol)) { watchlist.push(symbol); saveWL(); renderWatchlist(); }
-  go('home'); openDetail(symbol);
+  if (!watchlist.includes(symbol)){watchlist.push(symbol);saveWL();renderWatchlist();}
+  go('home');openDetail(symbol);
 }
 
 // ── WATCHLIST ──
-let watchlist=JSON.parse(localStorage.getItem('wl_india')||'["RELIANCE.NS","TCS.NS","INFY.NS"]');
-function saveWL(){localStorage.setItem('wl_india',JSON.stringify(watchlist));}
+let watchlist=JSON.parse(localStorage.getItem('wl_india2')||'["RELIANCE:NSE","TCS:NSE","INFY:NSE"]');
+function saveWL(){localStorage.setItem('wl_india2',JSON.stringify(watchlist));}
 async function renderWatchlist() {
   const body=document.getElementById('watchlist-body');
-  if (!watchlist.length) { body.innerHTML='<div class="wl-empty">Add stocks to watchlist</div>'; return; }
+  if (!watchlist.length){body.innerHTML='<div class="wl-empty">Add stocks to watchlist</div>';return;}
   body.innerHTML=watchlist.map(s=>`
     <div class="wl-item" id="wl-${s.replace(/[^a-z0-9]/gi,'_')}">
-      <div><div class="wl-symbol">${s.replace('.NS','').replace('^','')}</div><div class="wl-name">Loading...</div></div>
+      <div><div class="wl-symbol">${shortSym(s)}</div><div class="wl-name">Loading...</div></div>
       <div style="display:flex;align-items:center">
         <div class="wl-right"><div class="wl-price">—</div><div class="wl-change">—</div></div>
         <button class="wl-remove" onclick="event.stopPropagation();removeWL('${s}')">✕</button>
       </div>
     </div>`).join('');
-  const quotes=await yfQuote(watchlist);
+  const quotes=await tdQuote(watchlist);
   quotes.forEach(q=>{
-    const el=document.getElementById('wl-'+q.symbol.replace(/[^a-z0-9]/gi,'_'));
-    if (!el||!q.regularMarketPrice) return;
-    const cls=q.regularMarketChangePercent>=0?'up':'down', sign=q.regularMarketChangePercent>=0?'+':'';
-    el.querySelector('.wl-name').textContent=NAMES[q.symbol]||q.shortName||q.symbol.replace('.NS','');
-    el.querySelector('.wl-price').textContent=fmtP(q.regularMarketPrice);
-    el.querySelector('.wl-change').innerHTML=`<span class="${cls}">${sign}${q.regularMarketChangePercent?.toFixed(2)}%</span>`;
-    el.onclick=()=>openDetail(q.symbol);
+    const sym=q.symbol+':'+(q.exchange||'NSE');
+    const el=document.getElementById('wl-'+sym.replace(/[^a-z0-9]/gi,'_'));
+    if (!el||!q.close) return;
+    const pct=parseFloat(q.percent_change||0);
+    const cls=pct>=0?'up':'down',sign=pct>=0?'+':'';
+    el.querySelector('.wl-name').textContent=NAMES[sym]||q.name||shortSym(sym);
+    el.querySelector('.wl-price').textContent=fmtP(q.close);
+    el.querySelector('.wl-change').innerHTML=`<span class="${cls}">${sign}${pct.toFixed(2)}%</span>`;
+    el.onclick=()=>openDetail(sym);
   });
 }
-function removeWL(s){watchlist=watchlist.filter(x=>x!==s);saveWL();renderWatchlist();showToast('Removed '+s.replace('.NS',''));}
+function removeWL(s){watchlist=watchlist.filter(x=>x!==s);saveWL();renderWatchlist();showToast('Removed '+shortSym(s));}
 function promptAddWatchlist(){
   const s=prompt('Enter NSE symbol (e.g. RELIANCE, TCS, INFY):');
   if (!s) return;
-  const sym=s.trim().toUpperCase()+'.NS';
+  const sym=s.trim().toUpperCase()+':NSE';
   if (watchlist.includes(sym)){showToast('Already in watchlist');return;}
   watchlist.push(sym);saveWL();renderWatchlist();showToast('Added '+s.toUpperCase());
 }
@@ -730,8 +792,8 @@ function promptAddWatchlist(){
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 // ── CHART ──
-const chartInstances={}, chartSymbols={};
-async function loadChart(panelId, range) {
+const chartInstances={},chartSymbols={};
+async function loadChart(panelId,range) {
   const symbol=chartSymbols[panelId];
   if (!symbol) return;
   document.querySelectorAll('#'+panelId+'-chart-wrap .tf-btn').forEach(b=>{
@@ -741,32 +803,38 @@ async function loadChart(panelId, range) {
   const ohlcEl=document.getElementById(panelId+'-ohlc');
   const canvas=document.getElementById(panelId+'-canvas');
   ohlcEl.innerHTML='<span class="spin"></span> Loading chart...';
-  const resMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','6mo':'1d','1y':'1wk','2y':'1wk','5y':'1mo','10y':'1mo','max':'3mo'};
-  const interval=resMap[range]||'1d';
-  const result=await yfChart(symbol,range,interval);
-  if (!result||!result.indicators?.quote?.[0]?.close) {
-    ohlcEl.innerHTML='<span style="color:var(--red)">Chart data unavailable</span>'; return;
+
+  const intervalMap={'1d':'5min','5d':'15min','1mo':'1day','3mo':'1day','6mo':'1day','1y':'1week','2y':'1week','5y':'1month','10y':'1month','max':'1month'};
+  const sizeMap={'1d':78,'5d':100,'1mo':30,'3mo':90,'6mo':180,'1y':52,'2y':104,'5y':60,'10y':120,'max':240};
+  const interval=intervalMap[range]||'1day';
+  const outputsize=sizeMap[range]||52;
+
+  const data=await tdTimeSeries(symbol,interval,outputsize);
+  if (!data||data.status==='error'||!data.values?.length){
+    ohlcEl.innerHTML='<span style="color:var(--red)">Chart data unavailable</span>';return;
   }
-  const ts=result.timestamp, closes=result.indicators.quote[0].close;
-  const opens=result.indicators.quote[0].open, highs=result.indicators.quote[0].high, lows=result.indicators.quote[0].low;
-  const valid=ts.map((_,i)=>i).filter(i=>closes[i]!=null);
-  const labels=valid.map(i=>{
-    const d=new Date(ts[i]*1000);
+
+  const values=[...data.values].reverse();
+  const labels=values.map(v=>{
+    const d=new Date(v.datetime);
     if (range==='1d') return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     if (range==='10y'||range==='max') return d.toLocaleDateString([],{month:'short',year:'numeric'});
     return d.toLocaleDateString([],{month:'short',day:'numeric'});
   });
-  const c=valid.map(i=>closes[i]);
-  const first=c[0], last=c[c.length-1], isUp=last>=first;
+  const closes=values.map(v=>parseFloat(v.close));
+  const opens=values.map(v=>parseFloat(v.open));
+  const highs=values.map(v=>parseFloat(v.high));
+  const lows=values.map(v=>parseFloat(v.low));
+  const first=closes[0],last=closes[closes.length-1],isUp=last>=first;
   const color=isUp?'#0ecb81':'#f6465d';
-  const li=valid[valid.length-1];
-  const chgAmt=(last-first).toFixed(2), chgPct=((last-first)/first*100).toFixed(2);
-  const cls=isUp?'td-up':'td-down', sign=isUp?'+':'';
-  ohlcEl.innerHTML=`<span>O: <b>₹${opens?.[li]?.toFixed(2)||'—'}</b></span><span>H: <b>₹${highs?.[li]?.toFixed(2)||'—'}</b></span><span>L: <b>₹${lows?.[li]?.toFixed(2)||'—'}</b></span><span>C: <b>₹${closes[li]?.toFixed(2)||'—'}</b></span><span class="${cls}">${sign}${chgAmt} (${sign}${chgPct}%)</span>`;
+  const li=values.length-1;
+  const chgAmt=(last-first).toFixed(2),chgPct=((last-first)/first*100).toFixed(2);
+  const cls=isUp?'td-up':'td-down',sign=isUp?'+':'';
+  ohlcEl.innerHTML=`<span>O: <b>₹${opens[li].toFixed(2)}</b></span><span>H: <b>₹${highs[li].toFixed(2)}</b></span><span>L: <b>₹${lows[li].toFixed(2)}</b></span><span>C: <b>₹${closes[li].toFixed(2)}</b></span><span class="${cls}">${sign}${chgAmt} (${sign}${chgPct}%)</span>`;
   if (chartInstances[panelId]) chartInstances[panelId].destroy();
   chartInstances[panelId]=new Chart(canvas,{
     type:'line',
-    data:{labels,datasets:[{data:c,borderColor:color,borderWidth:1.5,fill:true,
+    data:{labels,datasets:[{data:closes,borderColor:color,borderWidth:1.5,fill:true,
       backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,isUp?'rgba(14,203,129,0.18)':'rgba(246,70,93,0.18)');g.addColorStop(1,'rgba(0,0,0,0)');return g;},
       pointRadius:0,pointHoverRadius:4,tension:0.2}]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},
